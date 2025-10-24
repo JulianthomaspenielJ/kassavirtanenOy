@@ -1,30 +1,20 @@
 // Redux store configuration
-// TODO: Implement store setup with saga middleware
-
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
 
-// TODO: Import your reducers here
-// import tasksReducer from './reducers/tasksReducer';
-// import uiReducer from './reducers/uiReducer';
-// import usersReducer from './reducers/usersReducer';
-// import projectsReducer from './reducers/projectsReducer';
+// Import reducers
+import entitiesReducer from './reducers/entitiesReducer';
+import uiReducer from './reducers/uiReducer';
+import optimisticReducer from './reducers/optimisticReducer';
 
-// TODO: Import your root saga
-// import rootSaga from './sagas/rootSaga';
-
-// TODO: Implement the store configuration
-// Requirements:
-// 1. Create saga middleware
-// 2. Combine reducers for normalized state structure
-// 3. Apply saga and logger middleware
-// 4. Run root saga
-// 5. Enable Redux DevTools
+// Import root saga
+import rootSaga from './sagas/rootSaga';
 
 const rootReducer = combineReducers({
-  // TODO: Add your reducers here
-  // TODO: Use normalized state structure (entities, ui)
+  entities: entitiesReducer,
+  ui: uiReducer,
+  optimistic: optimisticReducer
 });
 
 const sagaMiddleware = createSagaMiddleware();
@@ -52,7 +42,7 @@ const composeEnhancers =
       })
     : compose;
 
-// TODO: Create and configure store
+// Create and configure store
 const store = createStore(
   rootReducer,
   composeEnhancers(
@@ -63,8 +53,8 @@ const store = createStore(
   )
 );
 
-// TODO: Run root saga
-// sagaMiddleware.run(rootSaga);
+// Run root saga
+sagaMiddleware.run(rootSaga);
 
 export default store;
 

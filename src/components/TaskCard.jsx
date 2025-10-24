@@ -1,18 +1,8 @@
 // Individual Task Card Component
-// TODO: Implement task card display
-
 import React from 'react';
 
-const TaskCard = ({ task, onEdit, onDelete }) => {
+const TaskCard = ({ task, onEdit, onDelete, isPending = false, isBeingDeleted = false }) => {
   
-  // TODO: Implement task card functionality
-  // Requirements:
-  // 1. Display task information in a card layout
-  // 2. Show different styles based on priority/status
-  // 3. Handle optimistic updates (show loading/pending states)
-  // 4. Show task-type specific information
-  // 5. Action buttons (edit, delete)
-
   const getPriorityColor = (priority) => {
     const colors = {
       'Low': '#22c55e',
@@ -33,11 +23,30 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
     return colors[status] || '#6b7280';
   };
 
-  // TODO: Check if this is an optimistic update
+  const getTaskTypeIcon = (taskType) => {
+    return taskType || '';
+  };
+
+  if (isBeingDeleted) {
+    return (
+      <div className="task-card being-deleted">
+        <div className="deleting-indicator">
+          <div className="spinner"></div>
+          <span>Deleting...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={`task-card ${task.taskType?.toLowerCase()}`}>
-      {/* TODO: Show optimistic update indicator */}
+    <div className={`task-card ${task.taskType?.toLowerCase()} ${isPending ? 'pending' : ''}`}>
+      {/* Optimistic update indicator */}
+      {isPending && (
+        <div className="pending-indicator">
+          <div className="spinner"></div>
+          <span>Syncing...</span>
+        </div>
+      )}
 
       <div className="task-card-header">
         <div className="task-meta">
@@ -45,7 +54,7 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
             className="task-type"
             style={{ backgroundColor: getPriorityColor(task.priority) }}
           >
-            {task.taskType}
+            {getTaskTypeIcon(task.taskType)}
           </span>
           <span 
             className="task-status"
@@ -56,8 +65,12 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
         </div>
         
         <div className="task-actions">
-          <button onClick={onEdit} className="btn-edit">✏️</button>
-          <button onClick={onDelete} className="btn-delete">🗑️</button>
+          <button onClick={onEdit} className="btn-edit" disabled={isPending}>
+            ✏️
+          </button>
+          <button onClick={onDelete} className="btn-delete" disabled={isPending}>
+            🗑️
+          </button>
         </div>
       </div>
 
@@ -73,10 +86,11 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
           </p>
         )}
 
-        {/* TODO: Show task-type specific info */}
+        {/* Task-type specific information */}
         {task.taskType === 'Bug' && task.severity && (
           <div className="task-severity">
-            Severity: <span className={`severity-${task.severity?.toLowerCase()}`}>
+            <span className="label">Severity:</span>
+            <span className={`severity-${task.severity?.toLowerCase()}`}>
               {task.severity}
             </span>
           </div>
@@ -84,14 +98,29 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
 
         {task.taskType === 'Feature' && task.acceptanceCriteria?.length > 0 && (
           <div className="task-criteria">
-            {task.acceptanceCriteria.length} acceptance criteria
+            <span className="label">Acceptance Criteria:</span>
+            <span>{task.acceptanceCriteria.length} items</span>
+          </div>
+        )}
+
+        {task.taskType === 'Enhancement' && (task.currentBehavior || task.proposedBehavior) && (
+          <div className="task-enhancement">
+            <span className="label">Enhancement Task</span>
+          </div>
+        )}
+
+        {task.taskType === 'Research' && task.researchQuestions?.length > 0 && (
+          <div className="task-research">
+            <span className="label">Research Questions:</span>
+            <span>{task.researchQuestions.length} items</span>
           </div>
         )}
 
         {/* Subtasks count */}
         {task.subtasks?.length > 0 && (
           <div className="task-subtasks">
-            Subtasks: {task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}
+            <span className="label">Subtasks:</span>
+            <span>{task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}</span>
           </div>
         )}
       </div>
@@ -108,7 +137,8 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
         )}
 
         <div className="task-priority">
-          Priority: <span style={{ color: getPriorityColor(task.priority) }}>
+          <span className="label">Priority:</span>
+          <span style={{ color: getPriorityColor(task.priority) }}>
             {task.priority}
           </span>
         </div>

@@ -1,7 +1,5 @@
 // Filter Bar Component
-// TODO: Implement advanced filtering controls
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TASK_TYPES, PRIORITIES, STATUSES } from '../api/mockApi';
 
 const FilterBar = ({ 
@@ -10,20 +8,19 @@ const FilterBar = ({
   users = [], 
   onFiltersChange 
 }) => {
+  const [searchInput, setSearchInput] = useState(filters.search || '');
 
-  // TODO: Implement filter functionality
-  // Requirements:
-  // 1. Project filter dropdown
-  // 2. Assignee filter dropdown  
-  // 3. Status filter dropdown
-  // 4. Task type filter dropdown
-  // 5. Search input with debouncing
-  // 6. Clear all filters button
-  // 7. Show active filter count
+  // Debounced search implementation
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onFiltersChange({
+        ...filters,
+        search: searchInput
+      });
+    }, 300);
 
-  const [searchInput, setSearchInput] = React.useState(filters.search || '');
-
-  // TODO: Implement debounced search with useEffect and setTimeout
+    return () => clearTimeout(timeoutId);
+  }, [searchInput, onFiltersChange, filters]);
 
   const handleFilterChange = (filterKey, value) => {
     onFiltersChange({
@@ -43,7 +40,14 @@ const FilterBar = ({
     });
   };
 
-  // TODO: Count active filters for display
+  // Count active filters
+  const activeFilterCount = [
+    filters.projectId,
+    filters.assigneeId,
+    filters.status !== 'all' ? filters.status : null,
+    filters.taskType !== 'all' ? filters.taskType : null,
+    filters.search
+  ].filter(Boolean).length;
 
   return (
     <div className="filter-bar">
@@ -128,10 +132,9 @@ const FilterBar = ({
           <button 
             onClick={clearAllFilters}
             className="clear-filters-btn"
-            // TODO: Disable when no active filters
+            disabled={activeFilterCount === 0}
           >
-            Clear Filters
-            {/* TODO: Show count of active filters */}
+            Clear Filters ({activeFilterCount})
           </button>
         </div>
       </div>
